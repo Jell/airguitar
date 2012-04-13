@@ -161,12 +161,12 @@ void setup() {
   pinMode(3,OUTPUT); //Speaker on pin 3
   pinMode(4,OUTPUT); //Power LED on pin 4
   digitalWrite(4, HIGH);
-  
+
   pinMode(finger1Pin,INPUT);
   pinMode(finger2Pin,INPUT);
   pinMode(finger3Pin,INPUT);
   pinMode(finger4Pin,INPUT);
-  
+
   attachInterrupt(0,checkDistance, HIGH);
   /**************************
       PWM audio configuration
@@ -177,18 +177,18 @@ void setup() {
   bitSet(TCCR2B, CS20);
   bitClear(TCCR2B, CS21);
   bitClear(TCCR2B, CS22);
-  
+
   /*************************
   Timer 1 interrupt configuration
   *************************/
-  
+
   /* Normal port operation, pins disconnected
   from timer operation (breaking pwm) */
   bitClear(TCCR1A, COM1A1);
   bitClear(TCCR1A, COM1A1);
   bitClear(TCCR1A, COM1A1);
   bitClear(TCCR1A, COM1A1);
-  
+
   /* Mode 4, CTC with TOP set by register
   OCR1A. Allows us to set variable timing for
   the interrupt by writing new values to
@@ -197,22 +197,22 @@ void setup() {
   bitClear(TCCR1A, WGM11);
   bitSet(TCCR1B, WGM12);
   bitClear(TCCR1B, WGM13);
-  
+
   /* set the clock prescaler to /8.  */
   bitClear(TCCR1B, CS10);
   bitSet(TCCR1B, CS11);
   bitClear(TCCR1B, CS12);
-  
+
   /* Disable Force Output Compare for
   Channels A and B. */
   bitClear(TCCR1C, FOC1A);
   bitClear(TCCR1C, FOC1B);
-  
+
   /* Initializes Output Compare
   Register A at 149 to set the
   initial pitch */
   OCR1A = pitch;
-  
+
   //disable input capture interrupt
   bitClear(TIMSK1, ICIE1);
   //disable Output
@@ -223,7 +223,7 @@ void setup() {
   bitSet(TIMSK1, OCIE1A);
   //disable Overflow Interrupt
   bitClear(TIMSK1, TOIE1);
-  
+
   // enable interrupts now that
   // registers have been set
   sei();
@@ -245,23 +245,23 @@ void loop()
    delayMicroseconds(2);
    pinMode(pingPin, INPUT);
 
-   
+
     // Delay to avoid bouncing signals
    delay(50);
-   
+
    // convert the time into a distance
    // in centimetres
    // and store in buffer
    distance_buffer[distance_index++
     % distance_length] = duration / 25 - 25;
-  
+
    //Find in the buffer the shortest
    // distance measured
    cm = 16000;
    for(int i = 0; i < distance_length; i++) {
       cm = min(cm, distance_buffer[i]);
    }
-   
+
    // Check which fingers are pressed
    fingerValue = 5;
    if(!digitalRead(finger4Pin)){
@@ -276,30 +276,30 @@ void loop()
    if(!digitalRead(finger1Pin)){
       fingerValue = 1;
    }
-  
+
    // Update the sustain and
    // sensitivity values
    sustain = analogRead(sustainPin);
    sensitivity = analogRead(sensitivityPin);
-  
+
    // Update the volume
    volume = (volume * sustain) / 1024;
-   
+
    if(volume > 128){
        volume = 128;
    }
-  
+
    // Check the accelerometer
    acc = analogRead(0);
    accDiff = lastAcc - acc;
-  
+
    // Update the volume value
    if (accDiff > sensitivity) {
       volume = 128;
    }
-   
+
    lastAcc = acc;
-  
+
    // Set the pitch according to the distance
    // between the two hands and the
    // fingers pressed
@@ -314,7 +314,7 @@ void loop()
       pitch = frequencies[7 +
        (((102 - 30) / 24) * 4 + fingerValue - 1)];
    }
-   
+
    OCR1A = pitch;
 }
 
@@ -327,10 +327,9 @@ ISR(TIMER1_COMPA_vect) {
       waveindex = 0;
    }
    waveindex++;
-} 
+}
 void checkDistance()        // here the interrupt is handled after wakeup
 {
     duration = micros();
     duration -= currenttime;
 }
-
